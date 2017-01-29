@@ -81,10 +81,47 @@ Asana.ServerModel = {
    */
   workspaces: function(callback, errback, options) {
     var self = this;
-    Asana.ApiBridge.request('GET', '/workspaces', {},
-        function(response) {
-          self._makeCallback(response, callback, errback);
-        }, options);
+    Asana.ApiBridge.request(
+      'GET',
+      '/workspaces',
+      {},
+      function(response) {
+        self._makeCallback(response, callback, errback);
+      }, options);
+  },
+
+  /**
+   * Requests the set of projects the logged-in user is in.
+   *
+   * @param callback {Function(workspaces)} Callback on success.
+   *     workspaces {dict[]}
+   */
+  projects: function(callback, errback, options) {
+    var self = this;
+    Asana.ApiBridge.request(
+      'GET',
+      '/projects',
+      {},
+      function(response) {
+        self._makeCallback(response, callback, errback);
+      }, options);
+  },
+
+  /**
+   * Requests a project.
+   *
+   * @param callback {Function(workspaces)} Callback on success.
+   *     workspaces {dict[]}
+   */
+  project: function(project_id, callback, errback, options) {
+    var self = this;
+    Asana.ApiBridge.request(
+      'GET',
+      '/projects/' + project_id,
+      {},
+      function(response) {
+        self._makeCallback(response, callback, errback);
+      }, options);
   },
 
   /**
@@ -96,14 +133,15 @@ Asana.ServerModel = {
   users: function(workspace_id, callback, errback, options) {
     var self = this;
     Asana.ApiBridge.request(
-        'GET', '/workspaces/' + workspace_id + '/users',
-        { opt_fields: 'name,photo.image_60x60' },
-        function(response) {
-          response.forEach(function (user) {
-            self._updateUser(workspace_id, user);
-          });
-          self._makeCallback(response, callback, errback);
-        }, options);
+      'GET',
+      '/workspaces/' + workspace_id + '/users',
+      { opt_fields: 'name,photo.image_60x60' },
+      function(response) {
+        response.forEach(function (user) {
+          self._updateUser(workspace_id, user);
+        });
+        self._makeCallback(response, callback, errback);
+      }, options);
   },
 
   /**
@@ -114,10 +152,13 @@ Asana.ServerModel = {
    */
   me: function(callback, errback, options) {
     var self = this;
-    Asana.ApiBridge.request('GET', '/users/me', {},
-        function(response) {
-          self._makeCallback(response, callback, errback);
-        }, options);
+    Asana.ApiBridge.request(
+      'GET',
+      '/users/me',
+      {},
+      function(response) {
+        self._makeCallback(response, callback, errback);
+      }, options);
   },
 
   /**
@@ -129,51 +170,41 @@ Asana.ServerModel = {
   createTask: function(workspace_id, task, callback, errback) {
     var self = this;
     Asana.ApiBridge.request(
-        'POST',
-        '/workspaces/' + workspace_id + '/tasks',
-        task,
-        function(response) {
-          self._makeCallback(response, callback, errback);
-        });
+      'POST',
+      '/workspaces/' + workspace_id + '/tasks',
+      task,
+      function(response) {
+        self._makeCallback(response, callback, errback);
+      });
   },
 
   /**
-   * Requests user type-ahead completions for a query.
+   * Makes an Asana API request to upload an attachment to a task.
+   *
+   * @param task {dict} Task fields.
+   * @param callback {Function(response)} Callback on success.
    */
-  userTypeahead: function(workspace_id, query, callback, errback) {
+  uploadAttachment: function(task, formData, callback, errback) {
     var self = this;
 
     Asana.ApiBridge.request(
-      'GET',
-      '/workspaces/' + workspace_id + '/typeahead',
+      'POST',
+      '/tasks/' + task.id + '/attachments',
       {
-        type: 'user',
-        query: query,
-        count: 10,
-        opt_fields: 'name,photo.image_60x60',
+        file: formData,
+        filename: 'screenshot.jpg'
       },
       function(response) {
-        self._makeCallback(
-          response,
-          function (users) {
-            users.forEach(function (user) {
-              self._updateUser(workspace_id, user);
-            });
-            callback(users);
-          },
-          errback);
-      },
-      {
-        miss_cache: true, // Always skip the cache.
+        self._makeCallback(response, callback, errback);
       });
   },
 
   logEvent: function(event) {
     Asana.ApiBridge.request(
-        'POST',
-        '/logs',
-        event,
-        function(response) {});
+      'POST',
+      '/logs',
+      event,
+      function(response) {});
   },
 
   /**

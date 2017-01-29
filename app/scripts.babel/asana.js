@@ -16,7 +16,10 @@ Asana = {
 
   // If the modifier key is TAB, amount of time user has from pressing it
   // until they can press Q and still get the popup to show up.
-  QUICK_ADD_WINDOW_MS: 5000
+  QUICK_ADD_WINDOW_MS: 5000,
+
+  BVA_WORKSPACE_ID: 9496185366116,
+  BUG_TRACKING_PROJECT_ID: 238095597876701
 
 };
 

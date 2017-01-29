@@ -170,7 +170,12 @@ Asana.ApiBridge = {
         attrs.dataType = 'json';
         attrs.processData = false;
         attrs.contentType = 'application/json';
+        if (path.indexOf('/attachments') != -1) {
+          attrs.headers['Content-Disposition'] = 'form-data; name="image"; filename="screenshot.jpg";';
+          attrs.contentType = false;
+        }
       }
+      console.log(attrs);
       $.ajax(attrs);
     });
   },

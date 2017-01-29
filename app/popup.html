@@ -2,25 +2,32 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <!-- build:js scripts/popup-vendor.js -->
+
+    <!-- build:js scripts/vendor.js -->
     <!-- bower:js -->
     <script src="bower_components/jquery/jquery.js"></script>
     <script src="bower_components/jquery-ui/jquery-ui.js"></script>
     <!-- endbower -->
     <!-- endbuild -->
-    <script type="text/javascript" src="scripts/asana.js"></script>
-    <script type="text/javascript" src="scripts/options.js"></script>
-    <script type="text/javascript" src="scripts/api_bridge.js"></script>
-    <script type="text/javascript" src="scripts/server_model.js"></script>
+
+    <!-- build:js scripts/popup.js -->
+    <script src="scripts/asana.js"></script>
+    <script src="scripts/options.js"></script>
+    <script src="scripts/api_bridge.js"></script>
+    <script src="scripts/server_model.js"></script>
+    <script src="scripts/popup.js"></script>
+    <!-- endbuild -->
+
     <!-- build:css styles/popup-vendor.css -->
     <!-- bower:css -->
     <!-- endbower -->
     <!-- endbuild -->
+
     <!-- build:css styles/main.css -->
     <link href="styles/main.css" rel="stylesheet">
     <!-- endbuild -->
   </head>
-  <body>
+  <body class="extension-popup">
     <div id="add_view" style="display: none;">
       <div class="banner">
         <div class="left-column">
@@ -28,9 +35,7 @@
         </div>
         <div class="middle-column">
           <span class="banner-add">
-
-            Add to
-            <span id="workspace"></span>
+            Project: <span id="workspace"></span>
             <div id="workspace_select_container">
               <select id="workspace_select"></select>
               <svg class="svgIcon  svgIcon-dropdownarrow " viewBox="0 0 32 32" title="dropdownarrow">
@@ -43,52 +48,13 @@
           <a id="close_popup" class="sprite close-x" tabindex="-1"></a>
         </div>
       </div>
-      <!-- <form action="submit" method="post"> -->
-      <div class="name-row">
-        <div class="left-column">
-          <span class="icon-assignee sprite"></span>
-        </div>
-        <div class="middle-column">
-          <input id="browser_name" class="generic-input" placeholder="Browser">
-        </div>
-        <div class="right-column">
-        </div>
-      </div>
-      <div class="notes-row">
+
+      <div class="input-row title-row">
         <div class="left-column">
           <span class="icon-notes sprite"></span>
         </div>
         <div class="middle-column">
-          <input id="browser_version" class="generic-input" placeholder="Browser Version">
-        </div>
-        <div class="right-column">
-        </div>
-      </div>
-      <div class="assignee-row">
-        <div class="left-column">
-          <span class="icon-notes sprite"></span>
-        </div>
-        <div class="middle-column">
-          <input id="screen_size" class="generic-input" placeholder="Screen Size">
-        </div>
-        <div class="right-column">
-        </div>
-      </div>
-      <div class="name-row">
-        <div class="left-column">
-          <span class="icon-checkbox sprite"></span>
-        </div>
-        <div class="middle-column">
-          <span>Priority</span>
-          <select id="priority">
-            <option value="p0">P0</option>
-            <option value="p1">P1</option>
-            <option value="p2">P2</option>
-            <option value="p3">P3</option>
-            <option value="p4">P4</option>
-          </select>
-        </div>
-        <div class="right-column">
+          <input id="bug-title" class="generic-input" placeholder="Title">
         </div>
       </div>
       <div class="buttons">
@@ -108,7 +74,6 @@
           <span class="success-message">Added <a id="new_task_link" target="_blank" href=""></a></span>
         </div>
       </div>
-      <!-- </form> -->
     </div>
     <div id="login_view" style="display: none;">
       <div class="banner">
@@ -129,8 +94,20 @@
       </div>
     </div>
 
-    <!-- build:js scripts/popup.js -->
-    <script src="scripts/popup.js"></script>
-    <!-- endbuild -->
+    <!--
+    <div id="assignee_token" class="tokenView" style="display: inline-flex;">
+      <div class="photo-view small tokenView-photo">
+        <div class="Avatar Avatar--small" style="background-image: url(&quot;https://s3.amazonaws.com/profile_photos/18705616604872.whkaLXgpCKukPSSdbmB0_60x60.png&quot;);"></div>
+      </div>
+      <span class="tokenView-label">
+        <span class="tokenView-labelText">Tyler Shambora</span>
+      </span>
+      <a id="assignee_token_remove" class="tokenView-remove">
+        <svg class="svgIcon tokenView-removeIcon" viewBox="0 0 32 32" title="remove">
+          <polygon points="23.778,5.393 16,13.172 8.222,5.393 5.393,8.222 13.172,16 5.393,23.778 8.222,26.607 16,18.828 23.778,26.607 26.607,23.778 18.828,16 26.607,8.222"></polygon>
+        </svg>
+      </a>
+    </div>
+    -->
   </body>
 </html>

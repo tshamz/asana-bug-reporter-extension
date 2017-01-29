@@ -11,6 +11,7 @@ gulp.task('extras', () => {
   return gulp.src([
     'app/*.*',
     'app/_locales/**',
+    'app/scripts/contentscript.js',
     '!app/scripts.babel',
     '!app/*.json',
     '!app/*.html',
@@ -74,15 +75,15 @@ gulp.task('html', ['styles'], () => {
 
 gulp.task('chromeManifest', () => {
   return gulp.src('app/manifest.json')
-    .pipe($.chromeManifest({
-      buildnumber: true,
-      background: {
-        target: 'scripts/background.js',
-        exclude: [
-          'scripts/chromereload.js'
-        ]
-      }
-  }))
+  //   .pipe($.chromeManifest({
+  //     buildnumber: true,
+  //     background: {
+  //       target: 'scripts/background.js',
+  //       exclude: [
+  //         'scripts/chromereload.js'
+  //       ]
+  //     }
+  // }))
   .pipe($.if('*.css', $.cleanCss({compatibility: '*'})))
   .pipe($.if('*.js', $.sourcemaps.init()))
   .pipe($.if('*.js', $.uglify()))

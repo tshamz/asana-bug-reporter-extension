@@ -642,3 +642,37 @@ input:focus, textarea:focus {
   border: 1px solid #74C1ED;
   box-shadow: 0px 0px 5px 1px rgba(31, 141, 214, 0.3);
 }
+
+
+
+
+
+
+
+
+
+.title-row {
+  @extend .name-row;
+  @extend .notes-row;
+  input {
+    width: 100%;
+  }
+}
+
+.browser-row {
+  @extend .name-row;
+  @extend .assignee-row;
+}
+
+.browser-version-row {
+  @extend .notes-row;
+}
+
+.device-screen-size-row {
+  @extend .name-row;
+  @extend .assignee-row;
+}
+
+.priority-row {
+  @extend .notes-row;
+}
