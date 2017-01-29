@@ -1,0 +1,10 @@
+{
+  "appName": {
+    "message": "asana bug reporter extension",
+    "description": "The name of the application"
+  },
+  "appDescription": {
+    "message": "Hooks into an asana bugs project to quickly report bugs from the browser",
+    "description": "The description of the application"
+  }
+}

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <!-- build:js scripts/popup-vendor.js -->
+    <!-- bower:js -->
+    <script src="bower_components/jquery/jquery.js"></script>
+    <script src="bower_components/jquery-ui/jquery-ui.js"></script>
+    <!-- endbower -->
+    <!-- endbuild -->
+    <script type="text/javascript" src="scripts/asana.js"></script>
+    <script type="text/javascript" src="scripts/options.js"></script>
+    <script type="text/javascript" src="scripts/api_bridge.js"></script>
+    <script type="text/javascript" src="scripts/server_model.js"></script>
+    <!-- build:css styles/popup-vendor.css -->
+    <!-- bower:css -->
+    <!-- endbower -->
+    <!-- endbuild -->
+    <!-- build:css styles/main.css -->
+    <link href="styles/main.css" rel="stylesheet">
+    <!-- endbuild -->
+  </head>
+  <body>
+    <div id="add_view" style="display: none;">
+      <div class="banner">
+        <div class="left-column">
+          <div id="logo" class="sprite"></div>
+        </div>
+        <div class="middle-column">
+          <span class="banner-add">
+
+            Add to
+            <span id="workspace"></span>
+            <div id="workspace_select_container">
+              <select id="workspace_select"></select>
+              <svg class="svgIcon  svgIcon-dropdownarrow " viewBox="0 0 32 32" title="dropdownarrow">
+                <polygon points="28,12.5 25.5,10 16.586,18.914 7.5,10 5,12.5 16.5,24"></polygon>
+              </svg>
+            </div>
+          </span>
+        </div>
+        <div class="right-column">
+          <a id="close_popup" class="sprite close-x" tabindex="-1"></a>
+        </div>
+      </div>
+      <!-- <form action="submit" method="post"> -->
+      <div class="name-row">
+        <div class="left-column">
+          <span class="icon-assignee sprite"></span>
+        </div>
+        <div class="middle-column">
+          <input id="browser_name" class="generic-input" placeholder="Browser">
+        </div>
+        <div class="right-column">
+        </div>
+      </div>
+      <div class="notes-row">
+        <div class="left-column">
+          <span class="icon-notes sprite"></span>
+        </div>
+        <div class="middle-column">
+          <input id="browser_version" class="generic-input" placeholder="Browser Version">
+        </div>
+        <div class="right-column">
+        </div>
+      </div>
+      <div class="assignee-row">
+        <div class="left-column">
+          <span class="icon-notes sprite"></span>
+        </div>
+        <div class="middle-column">
+          <input id="screen_size" class="generic-input" placeholder="Screen Size">
+        </div>
+        <div class="right-column">
+        </div>
+      </div>
+      <div class="name-row">
+        <div class="left-column">
+          <span class="icon-checkbox sprite"></span>
+        </div>
+        <div class="middle-column">
+          <span>Priority</span>
+          <select id="priority">
+            <option value="p0">P0</option>
+            <option value="p1">P1</option>
+            <option value="p2">P2</option>
+            <option value="p3">P3</option>
+            <option value="p4">P4</option>
+          </select>
+        </div>
+        <div class="right-column">
+        </div>
+      </div>
+      <div class="buttons">
+        <div class="left-column"></div>
+        <div class="middle-column">
+          <div id="add_button" tabindex="0" class="buttonView buttonView--primary buttonView--large">
+            <span class="new-button-text">Add Bug to Asana</span>
+          </div>
+        </div>
+      </div>
+      <div class="footer">
+        <div id="error" class="footer-status" style="display:none">
+          <span class="error-message">Sorry, there was a problem. Please try again.</span>
+        </div>
+        <div id="success" class="footer-status" style="display:none">
+          <div class="sprite icon-success"></div>
+          <span class="success-message">Added <a id="new_task_link" target="_blank" href=""></a></span>
+        </div>
+      </div>
+      <!-- </form> -->
+    </div>
+    <div id="login_view" style="display: none;">
+      <div class="banner">
+        <div class="left-column">
+          <div id="logo" class="sprite"></div>
+        </div>
+        <div class="middle-column">
+          <span class="banner-add">Add to Asana</span>
+        </div>
+        <div class="right-column">
+          <a id="close_login" class="sprite close-x" tabindex="-1"></a>
+        </div>
+      </div>
+      <div class="content">
+        You must log in to Asana before you can add tasks.
+        <span id="signup_button" class="buttonView buttonView--large"><span class="new-button-text">Sign Up</span></span>
+        <span id="login_button" class="buttonView buttonView--primary buttonView--large"><span class="new-button-text">Log In</span></span>
+      </div>
+    </div>
+
+    <!-- build:js scripts/popup.js -->
+    <script src="scripts/popup.js"></script>
+    <!-- endbuild -->
+  </body>
+</html>
