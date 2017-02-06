@@ -106,6 +106,9 @@ Asana.ApiBridge = {
         data: params,
         options: { client_name: client_name }
       };
+      // if (path.indexOf('/attachments') !== -1) {
+      //   body_data.data = params.file;
+      // }
     } else {
       // GET/DELETE request, add params as URL parameters.
       var url_params = Asana.update({ opt_client_name: client_name }, params);

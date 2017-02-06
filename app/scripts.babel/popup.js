@@ -170,7 +170,7 @@ Popup = {
   },
 
   showView: function(name) {
-    ['login', 'add'].forEach(function(view_name) {
+    ['login', 'add', 'loading'].forEach(function(view_name) {
       $('#' + view_name + '_view').css('display', view_name === name ? '' : 'none');
     });
   },
@@ -247,10 +247,9 @@ Popup = {
       });
       Asana.ServerModel.projects(function(projects) {
         var select = $('#workspace_select');
-        select.html('');
+        select.html('').append('<option selected value="">N/A</option>');
         projects.forEach(function(project) {
-          $('#workspace_select').append(
-              '<option value="' + project.id + '">' + project.name + '</option>');
+          $('#workspace_select').append('<option value="' + project.id + '">' + project.name + '</option>');
         });
         if (projects.length > 1) {
           $('workspace_select_container').show();
@@ -395,6 +394,8 @@ Popup = {
       });
     }
 
+    var taskMessage = 'How to file a new bug:\n\n1. Copy this task! Select \'Copy Task...\' from the task actions icon (the three dot button) in the top-right corner of the right pane.\n\n2. Fill in the following details within the description:\n\n•URL:\n•Steps to reproduce:\n•What you expected to happen:\n•What actually happened: \n•More details:\n\n3. Fill out the Browser, Browser, Priority, Device / Screen Size fields.\n\n4. Attach screenshots of the issue to give more context on the bug.\n\n5. Assign to Project Manager.\n\nNotes: Before you file a new bug, please check to see if it has already been filed in this project. If it has, heart or comment on the existing task to indicate that you\'ve experienced the same bug (instead of adding another task).\n\nMake sure it\'s actually a bug and not an enhancement requested by the client.'
+
     // Gather up custom fields data
     var customFieldsData = {};
     $('[data-custom-field]').each(function () {
@@ -411,16 +412,11 @@ Popup = {
       customFieldsData[fieldKey] = fieldValue;
     });
 
-
-
-
-
-
     Asana.ServerModel.createTask(
         Asana.BVA_WORKSPACE_ID,
         {
           name: $('#bug-title').val(),
-          notes: 'Test: ' + Date.now(),
+          notes: taskMessage,
           projects: [Asana.BUG_TRACKING_PROJECT_ID],
           custom_fields: customFieldsData
         },
@@ -452,10 +448,6 @@ Popup = {
             var blob = dataURItoBlob(dataUrl);
             var fd = new FormData();
             fd.append('image', blob, 'screenshot.jpg');
-
-            var xhr = new XMLHttpRequest;
-            xhr.open('POST', 'http://tylershambora.com', true);
-            xhr.send(fd);
 
             Asana.ServerModel.uploadAttachment(
               task,
@@ -503,15 +495,6 @@ Popup = {
           me.showError(response.errors[0].message);
         });
   },
-
-
-
-
-
-
-
-
-
 
   /**
    * Helper to show a success message after a task is added.

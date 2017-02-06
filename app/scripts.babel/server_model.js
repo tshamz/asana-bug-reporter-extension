@@ -187,13 +187,14 @@ Asana.ServerModel = {
   uploadAttachment: function(task, formData, callback, errback) {
     var self = this;
 
+    var xhr = new XMLHttpRequest;
+    xhr.open('POST', 'https://app.asana.com/api/1.0/tasks/' + task.id + '/attachments', true);
+    xhr.send(formData);
+
     Asana.ApiBridge.request(
       'POST',
       '/tasks/' + task.id + '/attachments',
-      {
-        file: formData,
-        filename: 'screenshot.jpg'
-      },
+      {file: formData},
       function(response) {
         self._makeCallback(response, callback, errback);
       });
