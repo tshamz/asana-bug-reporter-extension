@@ -133,7 +133,7 @@ gulp.task('wiredep', () => {
 gulp.task('package', function () {
   var manifest = require('./dist/manifest.json');
   return gulp.src('dist/**')
-      .pipe($.zip('asana bug reporter extension-' + manifest.version + '.zip'))
+      .pipe($.zip('Asana Bug Reporter Extension-' + manifest.version + '.zip'))
       .pipe(gulp.dest('package'));
 });
 

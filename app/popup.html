@@ -41,9 +41,11 @@
         </div>
         <div class="middle-column">
           <span class="banner-add">
-            Project: <span id="workspace"></span>
-            <div id="workspace_select_container">
-              <select id="workspace_select"></select>
+            Project: <span id="project"></span>
+            <div id="project_select_container">
+              <select id="project_select">
+                <option selected value="">Bug Tracking</option>
+              </select>
               <svg class="svgIcon  svgIcon-dropdownarrow " viewBox="0 0 32 32" title="dropdownarrow">
                 <polygon points="28,12.5 25.5,10 16.586,18.914 7.5,10 5,12.5 16.5,24"></polygon>
               </svg>
@@ -61,6 +63,16 @@
         </div>
         <div class="middle-column">
           <input id="bug-title" class="generic-input" placeholder="Title">
+        </div>
+      </div>
+      <div class="input-row estimate-row">
+        <div class="left-column">
+          <span class="icon-notes sprite"></span>
+        </div>
+        <div class="middle-column">
+          <input id="estimate-enabled" type="checkbox" class="generic-input" placeholder="hours">
+          <span class="label">Estimate: </span>
+          <input id="bug-estimate" class="generic-input" placeholder="hours">
         </div>
       </div>
       <div class="buttons">

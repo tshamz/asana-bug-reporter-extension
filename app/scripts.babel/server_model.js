@@ -101,7 +101,9 @@ Asana.ServerModel = {
     Asana.ApiBridge.request(
       'GET',
       '/projects',
-      {},
+      {
+        archived: false
+      },
       function(response) {
         self._makeCallback(response, callback, errback);
       }, options);
@@ -187,10 +189,12 @@ Asana.ServerModel = {
   uploadAttachment: function(task, formData, callback, errback) {
     var self = this;
 
-    var xhr = new XMLHttpRequest;
-    xhr.open('POST', 'https://app.asana.com/api/1.0/tasks/' + task.id + '/attachments', true);
-    xhr.send(formData);
+    // throws: "file: Missing input"
+    // var xhr = new XMLHttpRequest;
+    // xhr.open('POST', 'https://app.asana.com/api/1.0/tasks/' + task.id + '/attachments', true);
+    // xhr.send(formData);
 
+    // throws: "file: Missing filename in Content-Disposition header"
     Asana.ApiBridge.request(
       'POST',
       '/tasks/' + task.id + '/attachments',

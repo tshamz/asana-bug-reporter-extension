@@ -39,6 +39,17 @@ Popup = {
       me.showError(response.errors[0].message);
     };
 
+    var button = $('#add_button');
+    button.click(function() {
+      me.createTask();
+      return false;
+    });
+    button.keydown(function(e) {
+      if (e.keyCode === 13) {
+        me.createTask();
+      }
+    });
+
     // Ah, the joys of asynchronous programming.
     // To initialize, we've got to gather various bits of information.
     // Starting with a reference to the window and tab that were active when
@@ -54,37 +65,24 @@ Popup = {
         // And ensure the user is logged in ...
         Asana.ServerModel.isLoggedIn(function(is_logged_in) {
           if (is_logged_in) {
-            if (window.quick_add_request) {
-              Asana.ServerModel.logEvent({
-                name: 'ChromeExtension-Open-QuickAdd'
-              });
-              // If this was a QuickAdd request (set by the code popping up
-              // the window in Asana.ExtensionServer), then we have all the
-              // info we need and should show the add UI right away.
-              me.showAddUi(
-                  quick_add_request.url, quick_add_request.title,
-                  quick_add_request.selected_text,
-                  quick_add_request.favicon_url);
-            } else {
-              Asana.ServerModel.logEvent({
-                name: 'ChromeExtension-Open-Button'
-              });
-              // Otherwise we want to get the selection from the tab that
-              // was active when we were opened. So we set up a listener
-              // to listen for the selection send event from the content
-              // window ...
-              var selection = '';
-              var listener = function(request, sender, sendResponse) {
-                if (request.type === 'selection') {
-                  chrome.runtime.onMessage.removeListener(listener);
-                  console.info('Asana popup got selection');
-                  selection = '\n' + request.value;
-                }
-              };
-              chrome.runtime.onMessage.addListener(listener);
-              me.buildCustomFieldsUI();
-              me.showAddUi(tab.url, tab.title, '', tab.favIconUrl);
-            }
+            Asana.ServerModel.logEvent({
+              name: 'ChromeExtension-Open-Button'
+            });
+            // Otherwise we want to get the selection from the tab that
+            // was active when we were opened. So we set up a listener
+            // to listen for the selection send event from the content
+            // window ...
+            // var selection = '';
+            // var listener = function(request, sender, sendResponse) {
+            //   if (request.type === 'selection') {
+            //     chrome.runtime.onMessage.removeListener(listener);
+            //     console.info('Asana popup got selection');
+            //     selection = '\n' + request.value;
+            //   }
+            // };
+            // chrome.runtime.onMessage.addListener(listener);
+            me.buildCustomFieldsUI();
+            me.showAddUi(tab.url, tab.title, '', tab.favIconUrl);
           } else {
             // The user is not even logged in. Prompt them to do so!
             me.showLogin(
@@ -242,21 +240,30 @@ Popup = {
     // Populate workspace data and project selector and select default.
     Asana.ServerModel.me(function(user) {
       me.user_id = user.id;
-      Asana.ServerModel.workspaces(function(workspaces) {
-        me.workspaces = workspaces;
-      });
+
+      // me.onWorkspaceChanged();
+
+      // // Set initial UI state
+      // me.resetFields();
+      // me.showView('add');
+      // var bugTitle = $('#bug-title');
+      // bugTitle.focus();
+      // bugTitle.select();
+
       Asana.ServerModel.projects(function(projects) {
-        var select = $('#workspace_select');
+        var select = $('#project_select');
         select.html('').append('<option selected value="">N/A</option>');
-        projects.forEach(function(project) {
-          $('#workspace_select').append('<option value="' + project.id + '">' + project.name + '</option>');
+        var sortedProjects = projects.sort(function (a, b) {
+          var aLower = a.name.toLowerCase();
+          var bLower = b.name.toLowerCase();
+          return (aLower > bLower) ? 1 : ((bLower > aLower) ? -1 : 0);
         });
-        if (projects.length > 1) {
-          $('workspace_select_container').show();
-        } else {
-          $('workspace_select_container').hide();
-        }
-        select.val(me.options.default_workspace_id);
+        sortedProjects.forEach(function(project) {
+          if (project.name.indexOf(' CC') === -1 && project.name.indexOf(' MS') === -1) {
+            $('#project_select').append('<option value="' + project.id + '">' + project.name + '</option>');
+          }
+        });
+
         me.onWorkspaceChanged();
         select.change(function() {
           if (select.val() !== me.options.default_workspace_id) {
@@ -274,11 +281,6 @@ Popup = {
         bugTitle.focus();
         bugTitle.select();
 
-        if (favicon_url) {
-          $('.icon-use-link').css('background-image', 'url(' + favicon_url + ')');
-        } else {
-          $('.icon-use-link').addClass('no-favicon sprite');
-        }
       });
     });
   },
@@ -289,23 +291,26 @@ Popup = {
   setAddEnabled: function(enabled) {
     var me = this;
     var button = $('#add_button');
+
     if (enabled) {
       // Update appearance and add handlers.
       button.removeClass('is-disabled');
-      button.click(function() {
-        me.createTask();
-        return false;
-      });
-      button.keydown(function(e) {
-        if (e.keyCode === 13) {
-          me.createTask();
-        }
-      });
+
+      // button.click(function() {
+      //   me.createTask();
+      //   return false;
+      // });
+      // button.keydown(function(e) {
+      //   if (e.keyCode === 13) {
+      //     me.createTask();
+      //   }
+      // });
     } else {
       // Update appearance and remove handlers.
       button.addClass('is-disabled');
-      button.unbind('click');
-      button.unbind('keydown');
+
+      // button.unbind('click');
+      // button.unbind('keydown');
     }
   },
 
@@ -322,7 +327,7 @@ Popup = {
    * Clear inputs for new task entry.
    */
   resetFields: function() {
-    $('#bug-title, #browser-version-input').val('');
+    $('#bug-title, #estimate-enabled, #bug-estimate, #browser-version-input').val('');
     $('.select-input').each(function () {
       this.selectedIndex = '0';
     });
@@ -346,12 +351,12 @@ Popup = {
     var workspace_id = me.selectedWorkspaceId();
 
     // Update selected workspace
-    $('#workspace').html($('#workspace_select option:selected').text());
+    $('#project').html($('#project_select option:selected').text());
 
     // Save selection as new default.
     // Popup.options.default_workspace_id = workspace_id;
     Popup.options.default_workspace_id = Asana.BVA_WORKSPACE_ID;
-    Asana.ServerModel.saveOptions(me.options, function() {});
+    // Asana.ServerModel.saveOptions(me.options, function() {});
 
     me.setAddEnabled(true);
   },
@@ -394,7 +399,7 @@ Popup = {
       });
     }
 
-    var taskMessage = 'How to file a new bug:\n\n1. Copy this task! Select \'Copy Task...\' from the task actions icon (the three dot button) in the top-right corner of the right pane.\n\n2. Fill in the following details within the description:\n\n•URL:\n•Steps to reproduce:\n•What you expected to happen:\n•What actually happened: \n•More details:\n\n3. Fill out the Browser, Browser, Priority, Device / Screen Size fields.\n\n4. Attach screenshots of the issue to give more context on the bug.\n\n5. Assign to Project Manager.\n\nNotes: Before you file a new bug, please check to see if it has already been filed in this project. If it has, heart or comment on the existing task to indicate that you\'ve experienced the same bug (instead of adding another task).\n\nMake sure it\'s actually a bug and not an enhancement requested by the client.'
+    var taskMessage = 'How to file a new bug:\n\n1. Copy this task! Select \'Copy Task...\' from the task actions icon (the three dot button) in the top-right corner of the right pane.\n\n2. Fill in the following details within the description:\n\n•URL: ' + me.page_url + '\n•Steps to reproduce:\n•What you expected to happen:\n•What actually happened: \n•More details:\n\n3. Fill out the Browser, Browser, Priority, Device / Screen Size fields.\n\n4. Attach screenshots of the issue to give more context on the bug.\n\n5. Assign to Project Manager.\n\nNotes: Before you file a new bug, please check to see if it has already been filed in this project. If it has, heart or comment on the existing task to indicate that you\'ve experienced the same bug (instead of adding another task).\n\nMake sure it\'s actually a bug and not an enhancement requested by the client.'
 
     // Gather up custom fields data
     var customFieldsData = {};
@@ -412,15 +417,37 @@ Popup = {
       customFieldsData[fieldKey] = fieldValue;
     });
 
+    var bugTitle = $('#bug-title').val();
+    var projectsArray = [Asana.BUG_TRACKING_PROJECT_ID];
+
+    if (bugTitle.indexOf('BUG:') === -1) {
+      bugTitle = 'BUG: ' + bugTitle;
+    }
+
+    if ($('#estimate-enabled').is(':checked')) {
+      bugTitle = '[' + $('#bug-estimate').val() + '] ' + bugTitle;
+    } else {
+      bugTitle = '[?] ' + bugTitle;
+    }
+
+    if ($('#project_select').val() !== '') {
+      projectsArray.push(parseInt($('#project_select').val(), 10));
+    }
+
     Asana.ServerModel.createTask(
         Asana.BVA_WORKSPACE_ID,
         {
-          name: $('#bug-title').val(),
+          name: bugTitle,
           notes: taskMessage,
-          projects: [Asana.BUG_TRACKING_PROJECT_ID],
+          projects: projectsArray,
           custom_fields: customFieldsData
         },
         function(task) {
+          me.setAddWorking(false);
+          me.showSuccess(task);
+          me.resetFields();
+          $('#bug-title').focus();
+
           // Success! Show task success, then get ready for another input.
           chrome.tabs.captureVisibleTab(null, {}, function (dataUrl) {
             console.log('screenshot taken.');
@@ -459,32 +486,11 @@ Popup = {
                 console.error(err);
               }
             )
-
-
-            // fetch(dataUrl)
-            // .then(function (response) {
-            //   return response.blob();
-            // })
-            // .then(function (blob) {
-            //   Asana.ServerModel.uploadAttachment(
-            //     task,
-            //     blob,
-            //     function() {
-            //       console.log('attachment successfully sent.');
-            //     },
-            //     function(err) {
-            //       console.error(err);
-            //     }
-            //   )
-            // });
           });
           Asana.ServerModel.logEvent({
             name: 'ChromeExtension-CreateTask-Success'
           });
-          me.setAddWorking(false);
-          me.showSuccess(task);
-          me.resetFields();
-          $('#bug-title').focus();
+
         },
         function(response) {
           // Failure. :( Show error, but leave form available for retry.
@@ -542,7 +548,7 @@ Popup = {
   },
 
   firstInput: function() {
-    return $('#workspace_select');
+    return $('#project_select');
   },
 
   lastInput: function() {
