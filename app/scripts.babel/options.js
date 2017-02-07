@@ -1,4 +1,4 @@
-console.log('\'Allo \'Allo! Option');
+// console.log('\'Allo \'Allo! Option');
 
 /**
  * Module to load/save options to preferences. Options are represented

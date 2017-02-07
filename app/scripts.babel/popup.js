@@ -1,4 +1,4 @@
-console.log('\'Allo \'Allo! Popup');
+// console.log('\'Allo \'Allo! Popup');
 
 /**
  * Code for the popup UI.
@@ -83,6 +83,11 @@ Popup = {
             // chrome.runtime.onMessage.addListener(listener);
             me.buildCustomFieldsUI();
             me.showAddUi(tab.url, tab.title, '', tab.favIconUrl);
+            chrome.tabs.captureVisibleTab(null, {}, function (dataUrl) {
+              console.log('screenshot taken.');
+
+              $('.screenshot').attr('src', dataUrl).show();
+            });
           } else {
             // The user is not even logged in. Prompt them to do so!
             me.showLogin(
@@ -331,6 +336,7 @@ Popup = {
     $('.select-input').each(function () {
       this.selectedIndex = '0';
     });
+    $('.screenshot').attr('src', '').hide();
   },
 
   /**
@@ -449,32 +455,32 @@ Popup = {
           $('#bug-title').focus();
 
           // Success! Show task success, then get ready for another input.
-          chrome.tabs.captureVisibleTab(null, {}, function (dataUrl) {
-            console.log('screenshot taken.');
+          // chrome.tabs.captureVisibleTab(null, {}, function (dataUrl) {
+          //   console.log('screenshot taken.');
 
-            function dataURItoBlob(dataURI) {
-                // convert base64/URLEncoded data component to raw binary data held in a string
-                var byteString;
-                if (dataURI.split(',')[0].indexOf('base64') >= 0)
-                    byteString = atob(dataURI.split(',')[1]);
-                else
-                    byteString = unescape(dataURI.split(',')[1]);
+          //   function dataURItoBlob(dataURI) {
+          //       // convert base64/URLEncoded data component to raw binary data held in a string
+          //       var byteString;
+          //       if (dataURI.split(',')[0].indexOf('base64') >= 0)
+          //           byteString = atob(dataURI.split(',')[1]);
+          //       else
+          //           byteString = unescape(dataURI.split(',')[1]);
 
-                // separate out the mime component
-                var mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+          //       // separate out the mime component
+          //       var mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
 
-                // write the bytes of the string to a typed array
-                var ia = new Uint8Array(byteString.length);
-                for (var i = 0; i < byteString.length; i++) {
-                    ia[i] = byteString.charCodeAt(i);
-                }
+          //       // write the bytes of the string to a typed array
+          //       var ia = new Uint8Array(byteString.length);
+          //       for (var i = 0; i < byteString.length; i++) {
+          //           ia[i] = byteString.charCodeAt(i);
+          //       }
 
-                return new Blob([ia], {type:mimeString});
-            }
+          //       return new Blob([ia], {type:mimeString});
+          //   }
 
-            var blob = dataURItoBlob(dataUrl);
-            var fd = new FormData();
-            fd.append('image', blob, 'screenshot.jpg');
+          //   var blob = dataURItoBlob(dataUrl);
+          //   var fd = new FormData();
+          //   fd.append('image', blob, 'screenshot.jpg');
 
             Asana.ServerModel.uploadAttachment(
               task,
@@ -486,7 +492,7 @@ Popup = {
                 console.error(err);
               }
             )
-          });
+          // });
           Asana.ServerModel.logEvent({
             name: 'ChromeExtension-CreateTask-Success'
           });

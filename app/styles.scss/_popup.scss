@@ -697,3 +697,18 @@ input:focus, textarea:focus {
 // #project_select_container {
 //   display: none;
 // }
+
+#add_view {
+  position: relative;
+}
+
+#screenshot-container {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  box-shadow: 0px 0px 10px 1px rgba(0, 0, 0, 0.2);
+}
+
+.screenshot {
+  max-height: 90px;
+}

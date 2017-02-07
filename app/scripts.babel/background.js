@@ -1,4 +1,4 @@
-console.log('\'Allo \'Allo! Event Page for Browser Action');
+// console.log('\'Allo \'Allo! Event Page for Browser Action');
 
 chrome.runtime.onInstalled.addListener(function (details) {
   console.log('previousVersion', details.previousVersion);

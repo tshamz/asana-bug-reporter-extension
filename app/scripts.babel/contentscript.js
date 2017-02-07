@@ -1,4 +1,4 @@
-console.log('\'Allo \'Allo! Content script');
+// console.log('\'Allo \'Allo! Content script');
 
 // chrome.runtime.sendMessage({greeting: 'hello from contentscript.js'}, function(response) {
 //   console.log('ding');
