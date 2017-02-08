@@ -703,6 +703,7 @@ input:focus, textarea:focus {
 }
 
 #screenshot-container {
+  display: none;
   position: absolute;
   bottom: 10px;
   right: 10px;

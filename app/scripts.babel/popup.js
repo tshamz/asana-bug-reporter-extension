@@ -1,5 +1,33 @@
 // console.log('\'Allo \'Allo! Popup');
 
+var dataUriToBlob = function (dataURI) {
+  // convert base64/URLEncoded data component to raw binary data held in a string
+  var byteString;
+
+  if (dataURI.split(',')[0].indexOf('base64') >= 0) {
+    byteString = atob(dataURI.split(',')[1]);
+  } else {
+    byteString = unescape(dataURI.split(',')[1]);
+  }
+
+  // write the bytes of the string to a typed array
+  var ia = new Uint8Array(byteString.length);
+
+  for (var i = 0; i < byteString.length; i++) {
+      ia[i] = byteString.charCodeAt(i);
+  }
+
+  return new Blob([ia], {type: 'image/jpeg'});
+};
+
+var createImgUrlFromUri = function (uri) {
+  console.log('ding: ' + dataURI);
+
+  var uri = uri || Popup.captureUri;
+  var blob = dataUriToBlob(uri);
+  return window.URL.createObjectURL(blob);
+};
+
 /**
  * Code for the popup UI.
  */
@@ -16,6 +44,7 @@ Popup = {
   page_url: null,
   page_selection: null,
   favicon_url: null,
+  captureUri: null,
 
   // State to track so we only log events once.
   has_edited_name: false,
@@ -39,17 +68,6 @@ Popup = {
       me.showError(response.errors[0].message);
     };
 
-    var button = $('#add_button');
-    button.click(function() {
-      me.createTask();
-      return false;
-    });
-    button.keydown(function(e) {
-      if (e.keyCode === 13) {
-        me.createTask();
-      }
-    });
-
     // Ah, the joys of asynchronous programming.
     // To initialize, we've got to gather various bits of information.
     // Starting with a reference to the window and tab that were active when
@@ -72,21 +90,19 @@ Popup = {
             // was active when we were opened. So we set up a listener
             // to listen for the selection send event from the content
             // window ...
-            // var selection = '';
-            // var listener = function(request, sender, sendResponse) {
-            //   if (request.type === 'selection') {
-            //     chrome.runtime.onMessage.removeListener(listener);
-            //     console.info('Asana popup got selection');
-            //     selection = '\n' + request.value;
-            //   }
-            // };
-            // chrome.runtime.onMessage.addListener(listener);
+            var selection = '';
+            var listener = function(request, sender, sendResponse) {
+              if (request.type === 'selection') {
+                chrome.runtime.onMessage.removeListener(listener);
+                console.info('Asana popup got selection');
+                selection = '\n' + request.value;
+              }
+            };
+            chrome.runtime.onMessage.addListener(listener);
             me.buildCustomFieldsUI();
             me.showAddUi(tab.url, tab.title, '', tab.favIconUrl);
-            chrome.tabs.captureVisibleTab(null, {}, function (dataUrl) {
-              console.log('screenshot taken.');
-
-              $('.screenshot').attr('src', dataUrl).show();
+            chrome.tabs.captureVisibleTab(null, {}, function (dataUri) {
+              Popup.captureUri = dataUri;
             });
           } else {
             // The user is not even logged in. Prompt them to do so!
@@ -151,6 +167,16 @@ Popup = {
         });
       }
       me.maybeDisablePageDetailsButton();
+    });
+
+    $('#add_button').click(function() {
+      me.createTask();
+      return false;
+    });
+    $('#add_button').keydown(function(e) {
+      if (e.keyCode === 13) {
+        me.createTask();
+      }
     });
 
   },
@@ -246,14 +272,7 @@ Popup = {
     Asana.ServerModel.me(function(user) {
       me.user_id = user.id;
 
-      // me.onWorkspaceChanged();
-
-      // // Set initial UI state
-      // me.resetFields();
-      // me.showView('add');
-      // var bugTitle = $('#bug-title');
-      // bugTitle.focus();
-      // bugTitle.select();
+      // look into caching projects or running this earlier
 
       Asana.ServerModel.projects(function(projects) {
         var select = $('#project_select');
@@ -269,23 +288,17 @@ Popup = {
           }
         });
 
-        me.onWorkspaceChanged();
-        select.change(function() {
-          if (select.val() !== me.options.default_workspace_id) {
-            Asana.ServerModel.logEvent({
-              name: 'ChromeExtension-ChangedWorkspace'
-            });
-          }
-          me.onWorkspaceChanged();
-        });
-
         // Set initial UI state
         me.resetFields();
         me.showView('add');
+
+        $('#project').html($('#project_select option:selected').text());
+
         var bugTitle = $('#bug-title');
         bugTitle.focus();
         bugTitle.select();
 
+        $('.screenshot').attr('src', Popup.captureUri).show();
       });
     });
   },
@@ -300,22 +313,9 @@ Popup = {
     if (enabled) {
       // Update appearance and add handlers.
       button.removeClass('is-disabled');
-
-      // button.click(function() {
-      //   me.createTask();
-      //   return false;
-      // });
-      // button.keydown(function(e) {
-      //   if (e.keyCode === 13) {
-      //     me.createTask();
-      //   }
-      // });
     } else {
       // Update appearance and remove handlers.
       button.addClass('is-disabled');
-
-      // button.unbind('click');
-      // button.unbind('keydown');
     }
   },
 
@@ -336,7 +336,7 @@ Popup = {
     $('.select-input').each(function () {
       this.selectedIndex = '0';
     });
-    $('.screenshot').attr('src', '').hide();
+    // $('.screenshot').attr('src', '').hide();
   },
 
   /**
@@ -354,16 +354,8 @@ Popup = {
    */
   onWorkspaceChanged: function() {
     var me = this;
-    var workspace_id = me.selectedWorkspaceId();
-
     // Update selected workspace
-    $('#project').html($('#project_select option:selected').text());
-
-    // Save selection as new default.
-    // Popup.options.default_workspace_id = workspace_id;
     Popup.options.default_workspace_id = Asana.BVA_WORKSPACE_ID;
-    // Asana.ServerModel.saveOptions(me.options, function() {});
-
     me.setAddEnabled(true);
   },
 
@@ -405,7 +397,7 @@ Popup = {
       });
     }
 
-    var taskMessage = 'How to file a new bug:\n\n1. Copy this task! Select \'Copy Task...\' from the task actions icon (the three dot button) in the top-right corner of the right pane.\n\n2. Fill in the following details within the description:\n\n•URL: ' + me.page_url + '\n•Steps to reproduce:\n•What you expected to happen:\n•What actually happened: \n•More details:\n\n3. Fill out the Browser, Browser, Priority, Device / Screen Size fields.\n\n4. Attach screenshots of the issue to give more context on the bug.\n\n5. Assign to Project Manager.\n\nNotes: Before you file a new bug, please check to see if it has already been filed in this project. If it has, heart or comment on the existing task to indicate that you\'ve experienced the same bug (instead of adding another task).\n\nMake sure it\'s actually a bug and not an enhancement requested by the client.'
+    var taskMessage = 'URL: ' + me.page_url + '\n•Steps to reproduce:\n•What you expected to happen:\n•What actually happened: \n•More details:\n\nNote: Before you file a new bug, please check to see if it has already been filed in this project. If it has, heart or comment the existing bug task to indicate that you\'ve experienced the same bug (instead of adding another task).\n\nMake sure it\'s actually a bug and not an enhancement requested by the client.'
 
     // Gather up custom fields data
     var customFieldsData = {};
@@ -454,48 +446,18 @@ Popup = {
           me.resetFields();
           $('#bug-title').focus();
 
-          // Success! Show task success, then get ready for another input.
-          // chrome.tabs.captureVisibleTab(null, {}, function (dataUrl) {
-          //   console.log('screenshot taken.');
+          var blob = dataUriToBlob(Popup.captureUri);
 
-          //   function dataURItoBlob(dataURI) {
-          //       // convert base64/URLEncoded data component to raw binary data held in a string
-          //       var byteString;
-          //       if (dataURI.split(',')[0].indexOf('base64') >= 0)
-          //           byteString = atob(dataURI.split(',')[1]);
-          //       else
-          //           byteString = unescape(dataURI.split(',')[1]);
-
-          //       // separate out the mime component
-          //       var mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
-
-          //       // write the bytes of the string to a typed array
-          //       var ia = new Uint8Array(byteString.length);
-          //       for (var i = 0; i < byteString.length; i++) {
-          //           ia[i] = byteString.charCodeAt(i);
-          //       }
-
-          //       return new Blob([ia], {type:mimeString});
-          //   }
-
-          //   var blob = dataURItoBlob(dataUrl);
-          //   var fd = new FormData();
-          //   fd.append('image', blob, 'screenshot.jpg');
-
-            Asana.ServerModel.uploadAttachment(
-              task,
-              fd,
-              function() {
-                console.log('attachment successfully sent.');
-              },
-              function(err) {
-                console.error(err);
-              }
-            )
-          // });
-          Asana.ServerModel.logEvent({
-            name: 'ChromeExtension-CreateTask-Success'
-          });
+          Asana.ServerModel.uploadAttachment(
+            task,
+            Popup.captureUri,
+            function() {
+              console.log('attachment successfully sent.');
+            },
+            function(err) {
+              console.error(err);
+            }
+          )
 
         },
         function(response) {

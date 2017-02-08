@@ -186,19 +186,16 @@ Asana.ServerModel = {
    * @param task {dict} Task fields.
    * @param callback {Function(response)} Callback on success.
    */
-  uploadAttachment: function(task, formData, callback, errback) {
+  uploadAttachment: function(task, uri, callback, errback) {
     var self = this;
 
-    // throws: "file: Missing input"
-    // var xhr = new XMLHttpRequest;
-    // xhr.open('POST', 'https://app.asana.com/api/1.0/tasks/' + task.id + '/attachments', true);
-    // xhr.send(formData);
-
-    // throws: "file: Missing filename in Content-Disposition header"
     Asana.ApiBridge.request(
       'POST',
       '/tasks/' + task.id + '/attachments',
-      {file: formData},
+      {
+        task: task.id,
+        uri: Popup.captureUri
+      },
       function(response) {
         self._makeCallback(response, callback, errback);
       });

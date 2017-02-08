@@ -9,6 +9,27 @@
  * to browser extensions, and other types of applications would have to obtain
  * an auth token to communicate with the API.
  */
+
+var dataUriToBlob = function (dataURI) {
+  // convert base64/URLEncoded data component to raw binary data held in a string
+  var byteString;
+
+  if (dataURI.split(',')[0].indexOf('base64') >= 0) {
+    byteString = atob(dataURI.split(',')[1]);
+  } else {
+    byteString = unescape(dataURI.split(',')[1]);
+  }
+
+  // write the bytes of the string to a typed array
+  var ia = new Uint8Array(byteString.length);
+
+  for (var i = 0; i < byteString.length; i++) {
+      ia[i] = byteString.charCodeAt(i);
+  }
+
+  return new Blob([ia], {type: 'image/jpeg'});
+};
+
 Asana.ApiBridge = {
 
   /**
@@ -106,9 +127,6 @@ Asana.ApiBridge = {
         data: params,
         options: { client_name: client_name }
       };
-      // if (path.indexOf('/attachments') !== -1) {
-      //   body_data.data = params.file;
-      // }
     } else {
       // GET/DELETE request, add params as URL parameters.
       var url_params = Asana.update({ opt_client_name: client_name }, params);
@@ -169,16 +187,19 @@ Asana.ApiBridge = {
         }
       };
       if (http_method === 'POST' || http_method === 'PUT') {
-        attrs.data = JSON.stringify(body_data);
-        attrs.dataType = 'json';
         attrs.processData = false;
-        attrs.contentType = 'application/json';
-        if (path.indexOf('/attachments') != -1) {
-          attrs.headers['Content-Disposition'] = 'form-data; name="image"; filename="screenshot.jpg";';
+        if (path.indexOf('/attachments') !== -1) {
+          var blob = dataUriToBlob(params.uri);
+          var formData = new FormData();
+          formData.append('file', blob, 'screenshot.jpg');
+          attrs.data = formData;
           attrs.contentType = false;
+        } else {
+          attrs.data = JSON.stringify(body_data);
+          attrs.dataType = 'json';
+          attrs.contentType = 'application/json';
         }
       }
-      console.log(attrs);
       $.ajax(attrs);
     });
   },
