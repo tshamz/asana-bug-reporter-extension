@@ -21,8 +21,6 @@ var dataUriToBlob = function (dataURI) {
 };
 
 var createImgUrlFromUri = function (uri) {
-  console.log('ding: ' + dataURI);
-
   var uri = uri || Popup.captureUri;
   var blob = dataUriToBlob(uri);
   return window.URL.createObjectURL(blob);
@@ -57,6 +55,7 @@ Popup = {
   workspaces: null,
   users: null,
   user_id: null,
+  projects: null,
 
   onLoad: function() {
     var me = this;
@@ -86,9 +85,29 @@ Popup = {
             Asana.ServerModel.logEvent({
               name: 'ChromeExtension-Open-Button'
             });
-            // Otherwise we want to get the selection from the tab that
-            // was active when we were opened. So we set up a listener
-            // to listen for the selection send event from the content
+
+            var sessionOptions = Asana.Options.loadOptionsSession();
+
+            if (sessionOptions.client_projects === null) {
+              Asana.ServerModel.projects(function(projects) {
+                var sortedClientProjects = projects.sort(function (a, b) {
+                  var aLower = a.name.toLowerCase();
+                  var bLower = b.name.toLowerCase();
+                  return (aLower > bLower) ? 1 : ((bLower > aLower) ? -1 : 0);
+                }).filter(function(project) {
+                  return project.name.indexOf(' CC') === -1 && project.name.indexOf(' MS') === -1;
+                });
+                sessionOptions.client_projects = sortedClientProjects;
+                Asana.Options.saveSessionOptions(sessionOptions);
+                Popup.projects = sortedClientProjects
+              });
+            } else {
+              Popup.projects = sessionOptions.client_projects;
+            }
+
+            // Get the selection from the tab that was active
+            // when we were opened. So we set up a listener to
+            // listen for the selection send event from the content
             // window ...
             var selection = '';
             var listener = function(request, sender, sendResponse) {
@@ -101,9 +120,6 @@ Popup = {
             chrome.runtime.onMessage.addListener(listener);
             me.buildCustomFieldsUI();
             me.showAddUi(tab.url, tab.title, '', tab.favIconUrl);
-            chrome.tabs.captureVisibleTab(null, {}, function (dataUri) {
-              Popup.captureUri = dataUri;
-            });
           } else {
             // The user is not even logged in. Prompt them to do so!
             me.showLogin(
@@ -173,12 +189,24 @@ Popup = {
       me.createTask();
       return false;
     });
+
     $('#add_button').keydown(function(e) {
       if (e.keyCode === 13) {
         me.createTask();
       }
     });
 
+    $('#project_select').change(function () {
+      Asana.ServerModel.logEvent({
+        name: 'ChromeExtension-ChangedProject'
+      });
+      me.onProjectChanged();
+    });
+
+    $('#info_screenshot_toggle').click(function () {
+      $('#bug_info, #bug_screenshot').toggle();
+      $(this).text() === 'screenshot' ? $(this).text('info') : $(this).text('screenshot');
+    });
   },
 
   maybeDisablePageDetailsButton: function() {
@@ -253,7 +281,7 @@ Popup = {
           $middleColumn.append($generatedInput);
           $('<div />', {
             'class': 'input-row ' + handelizedName + '-row'
-          }).append($leftColumn).append($middleColumn).insertBefore('.buttons');
+          }).append($leftColumn).append($middleColumn).appendTo('#bug_info');
         });
       }
     });
@@ -268,38 +296,55 @@ Popup = {
     me.page_selection = selected_text;
     me.favicon_url = favicon_url;
 
+    if (Popup.captureUri === null) {
+      chrome.tabs.captureVisibleTab(null, {}, function (dataUri) {
+        Popup.captureUri = dataUri;
+        var imageUrl = createImgUrlFromUri(Popup.captureUri);
+        $('.screenshot').attr('src', imageUrl);
+      });
+    } else {
+      var imageUrl = createImgUrlFromUri(Popup.captureUri);
+      $('.screenshot').attr('src', imageUrl);
+    }
+
+
+
     // Populate workspace data and project selector and select default.
     Asana.ServerModel.me(function(user) {
       me.user_id = user.id;
 
-      // look into caching projects or running this earlier
+      // Set initial UI state
 
-      Asana.ServerModel.projects(function(projects) {
-        var select = $('#project_select');
-        select.html('').append('<option selected value="">N/A</option>');
-        var sortedProjects = projects.sort(function (a, b) {
-          var aLower = a.name.toLowerCase();
-          var bLower = b.name.toLowerCase();
-          return (aLower > bLower) ? 1 : ((bLower > aLower) ? -1 : 0);
-        });
-        sortedProjects.forEach(function(project) {
-          if (project.name.indexOf(' CC') === -1 && project.name.indexOf(' MS') === -1) {
-            $('#project_select').append('<option value="' + project.id + '">' + project.name + '</option>');
-          }
-        });
+      var $project = $('#project')
+      var $select = $('#project_select');
+      var $selectContainer = $('#project_select_container');
+      var pollForProjects = setInterval(function () {
+        if (Popup.projects && Popup.projects.length > 1) {
+          $select.html('').append('<option selected value="">N/A</option>');
+          Popup.projects.forEach(function(project) {
+            $select.append('<option value="' + project.id + '">' + project.name + '</option>');
+          });
+          $project.html($('#project_select option:selected').text());
+          clearInterval(pollForProjects);
+        } else if (Popup.projects && Popup.projects.length === 1) {
+          $project.html(Popup.projects[0].name);
+          $selectContainer.hide();
+          clearInterval(pollForProjects);
+        } else if ((Popup.projects && Popup.projects.length === 1) || (Popup.projects !== null && Popup.projects.constructor !== Array)) {
+          $project.html('N/A');
+          $selectContainer.hide();
+          clearInterval(pollForProjects);
+        }
+      }, 500);
 
-        // Set initial UI state
-        me.resetFields();
-        me.showView('add');
+      me.resetFields();
+      me.showView('add');
 
-        $('#project').html($('#project_select option:selected').text());
+      var bugTitle = $('#bug-title');
+      bugTitle.focus();
+      bugTitle.select();
 
-        var bugTitle = $('#bug-title');
-        bugTitle.focus();
-        bugTitle.select();
-
-        $('.screenshot').attr('src', Popup.captureUri).show();
-      });
+      $('.screenshot').attr('src', Popup.captureUri).show();
     });
   },
 
@@ -332,10 +377,11 @@ Popup = {
    * Clear inputs for new task entry.
    */
   resetFields: function() {
-    $('#bug-title, #estimate-enabled, #bug-estimate, #browser-version-input').val('');
+    $('#bug-title, #bug-estimate, #browser-version-input').val('');
     $('.select-input').each(function () {
       this.selectedIndex = '0';
     });
+    $('#estimate-enabled').prop('checked', false)
     // $('.screenshot').attr('src', '').hide();
   },
 
@@ -352,10 +398,10 @@ Popup = {
   /**
    * Update the list of users as a result of setting/changing the workspace.
    */
-  onWorkspaceChanged: function() {
+  onProjectChanged: function() {
     var me = this;
-    // Update selected workspace
-    Popup.options.default_workspace_id = Asana.BVA_WORKSPACE_ID;
+    // Update selected project
+    $('#project').html($('#project_select option:selected').text());
     me.setAddEnabled(true);
   },
 

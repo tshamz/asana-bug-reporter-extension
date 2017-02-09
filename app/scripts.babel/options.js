@@ -43,6 +43,12 @@ Asana.Options = {
     };
   },
 
+  defaultOptionsSession: function() {
+    return {
+      client_projects: null
+    };
+  },
+
   /**
    * Load the user's preferences synchronously from local storage.
    *
@@ -61,6 +67,19 @@ Asana.Options = {
     }
   },
 
+  loadOptionsSession: function() {
+    var options_json = sessionStorage.options;
+    var options;
+    if (!options_json) {
+      options = this.defaultOptionsSession();
+      sessionStorage.options = JSON.stringify(options);
+      return options;
+    } else {
+      options = JSON.parse(options_json);
+      return options;
+    }
+  },
+
   /**
    * Save the user's preferences synchronously to local storage.
    * Overwrites all options.
@@ -69,6 +88,10 @@ Asana.Options = {
    */
   saveOptions: function(options) {
     localStorage.options = JSON.stringify(options);
+  },
+
+  saveSessionOptions: function(options) {
+    sessionStorage.options = JSON.stringify(options);
   },
 
   /**

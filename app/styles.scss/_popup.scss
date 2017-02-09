@@ -310,7 +310,7 @@ body {
   overflow: hidden;
   /* Also affects Asana.POPUP_UI_WIDTH and Asana.POPUP_UI_HEIGHT */
   width: 410px;
-  height: 310px;  /* keep this correct for the window-based (non-button) version */
+  height: 372px;  /* keep this correct for the window-based (non-button) version */
   padding: 0px;
   margin: 0px;
   background-color: #fff;
@@ -694,22 +694,40 @@ input:focus, textarea:focus {
   @extend .notes-row;
 }
 
-// #project_select_container {
-//   display: none;
-// }
-
 #add_view {
   position: relative;
 }
 
-#screenshot-container {
-  display: none;
-  position: absolute;
-  bottom: 10px;
-  right: 10px;
-  box-shadow: 0px 0px 10px 1px rgba(0, 0, 0, 0.2);
+.buttons {
+  position: relative;
+  display: flex;
+  align-items: center;
+  .middle-column {
+    width: auto;
+  }
+}
+
+#info_screenshot_toggle {
+  margin-left: 10px;
+  width: 70px;
+  text-align: center;
+}
+
+#bug_screenshot {
+  height: 255px;
+  background-color: #ddd;
+  display: flex;
+  align-items: center;
 }
 
 .screenshot {
-  max-height: 90px;
+  height: 235px;
+  width: 390px;
+  max-width: 100%;
+  padding: 10px;
+  object-fit: contain;
+}
+
+.footer > * {
+  border-top: 1px solid #e5e5e5;
 }

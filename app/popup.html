@@ -57,31 +57,41 @@
         </div>
       </div>
 
-      <div class="input-row title-row">
-        <div class="left-column">
-          <span class="icon-notes sprite"></span>
+      <div id="bug_info">
+        <div class="input-row title-row">
+          <div class="left-column">
+            <span class="icon-notes sprite"></span>
+          </div>
+          <div class="middle-column">
+            <input id="bug-title" class="generic-input" placeholder="Title">
+          </div>
         </div>
-        <div class="middle-column">
-          <input id="bug-title" class="generic-input" placeholder="Title">
+        <div class="input-row estimate-row">
+          <div class="left-column">
+            <span class="icon-notes sprite"></span>
+          </div>
+          <div class="middle-column">
+            <input id="estimate-enabled" type="checkbox" class="generic-input" placeholder="hours">
+            <span class="label">Estimate: </span>
+            <input id="bug-estimate" class="generic-input" placeholder="hours">
+          </div>
         </div>
       </div>
-      <div class="input-row estimate-row">
-        <div class="left-column">
-          <span class="icon-notes sprite"></span>
-        </div>
-        <div class="middle-column">
-          <input id="estimate-enabled" type="checkbox" class="generic-input" placeholder="hours">
-          <span class="label">Estimate: </span>
-          <input id="bug-estimate" class="generic-input" placeholder="hours">
-        </div>
+
+      <div id="bug_screenshot" style="display: none;">
+        <img class="screenshot" src="">
       </div>
+
       <div class="buttons">
-        <div class="left-column"></div>
+        <div class="left-column">
+          <span class="icon-checkbox sprite"></span>
+        </div>
         <div class="middle-column">
           <div id="add_button" tabindex="0" class="buttonView buttonView--primary buttonView--large">
             <span class="new-button-text">Add Bug to Asana</span>
           </div>
         </div>
+        <a id="info_screenshot_toggle" href="#">screenshot</a>
       </div>
       <div class="footer">
         <div id="error" class="footer-status" style="display:none">
@@ -110,10 +120,6 @@
         <span id="signup_button" class="buttonView buttonView--large"><span class="new-button-text">Sign Up</span></span>
         <span id="login_button" class="buttonView buttonView--primary buttonView--large"><span class="new-button-text">Log In</span></span>
       </div>
-    </div>
-
-    <div id="screenshot-container">
-      <img class="screenshot" src="" style="display: none;">
     </div>
 
     <!--
