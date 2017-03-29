@@ -1,5 +1,3 @@
-// console.log('\'Allo \'Allo! Popup');
-
 var dataUriToBlob = function (dataURI) {
   // convert base64/URLEncoded data component to raw binary data held in a string
   var byteString;
@@ -256,7 +254,9 @@ Popup = {
               'id': handelizedName + '-input',
               'class': 'select-input'
             });
-            field.enum_options.forEach(function (option) {
+            field.enum_options.filter(function (option) {
+              return option.enabled === true;
+            }).forEach(function (option) {
               $('<option />', {
                 'value': option.id,
                 'text': option.name

@@ -1,5 +1,3 @@
-// console.log('\'Allo \'Allo! Option');
-
 /**
  * Module to load/save options to preferences. Options are represented
  * as a dictionary with the following fields:
