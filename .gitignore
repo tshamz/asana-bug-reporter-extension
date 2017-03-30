@@ -10,3 +10,4 @@ app/scripts
 app/styles
 *.sublime-project
 *.sublime-workspace
+*.DS_Store*
