@@ -281,7 +281,8 @@ Popup = {
           $middleColumn.append($generatedInput);
           $('<div />', {
             'class': 'input-row ' + handelizedName + '-row'
-          }).append($leftColumn).append($middleColumn).appendTo('#bug_info');
+          }).append($leftColumn).append($middleColumn).insertBefore('.notes-row');
+          // .append($leftColumn).append($middleColumn).appendTo('#bug_info');
         });
       }
     });
@@ -315,26 +316,33 @@ Popup = {
 
       // Set initial UI state
 
-      var $project = $('#project')
+      // var $project = $('#project')
       var $select = $('#project_select');
-      var $selectContainer = $('#project_select_container');
+      // var $selectContainer = $('#project_select_container');
       var pollForProjects = setInterval(function () {
-        if (Popup.projects && Popup.projects.length > 1) {
-          $select.html('').append('<option selected value="">N/A</option>');
-          Popup.projects.forEach(function(project) {
-            $select.append('<option value="' + project.id + '">' + project.name + '</option>');
-          });
-          $project.html($('#project_select option:selected').text());
-          clearInterval(pollForProjects);
-        } else if (Popup.projects && Popup.projects.length === 1) {
-          $project.html(Popup.projects[0].name);
-          $selectContainer.hide();
-          clearInterval(pollForProjects);
-        } else if ((Popup.projects && Popup.projects.length === 1) || (Popup.projects !== null && Popup.projects.constructor !== Array)) {
-          $project.html('N/A');
-          $selectContainer.hide();
-          clearInterval(pollForProjects);
-        }
+        $select.html('').append('<option selected value="">N/A</option>');
+        Popup.projects.forEach(function(project) {
+          $select.append('<option value="' + project.id + '">' + project.name + '</option>');
+        });
+        $('#project_select').show();
+        clearInterval(pollForProjects);
+
+        // if (Popup.projects && Popup.projects.length > 1) {
+        //   $select.html('').append('<option selected value="">N/A</option>');
+        //   Popup.projects.forEach(function(project) {
+        //     $select.append('<option value="' + project.id + '">' + project.name + '</option>');
+        //   });
+        //   $project.html($('#project_select option:selected').text());
+        //   clearInterval(pollForProjects);
+        // } else if (Popup.projects && Popup.projects.length === 1) {
+        //   $project.html(Popup.projects[0].name);
+        //   $selectContainer.hide();
+        //   clearInterval(pollForProjects);
+        // } else if ((Popup.projects && Popup.projects.length === 1) || (Popup.projects !== null && Popup.projects.constructor !== Array)) {
+        //   $project.html('N/A');
+        //   $selectContainer.hide();
+        //   clearInterval(pollForProjects);
+        // }
       }, 500);
 
       me.resetFields();
@@ -377,7 +385,7 @@ Popup = {
    * Clear inputs for new task entry.
    */
   resetFields: function() {
-    $('#bug-title, #bug-estimate, #browser-version-input').val('');
+    $('#bug-title, #bug-estimate, #browser-version-input, #bug-notes').val('');
     $('.select-input').each(function () {
       this.selectedIndex = '0';
     });
@@ -401,7 +409,7 @@ Popup = {
   onProjectChanged: function() {
     var me = this;
     // Update selected project
-    $('#project').html($('#project_select option:selected').text());
+    // $('#project').html($('#project_select option:selected').text());
     me.setAddEnabled(true);
   },
 
@@ -443,7 +451,9 @@ Popup = {
       });
     }
 
-    var taskMessage = 'URL: ' + me.page_url + '\n•Steps to reproduce:\n•What you expected to happen:\n•What actually happened: \n•More details:\n\nNote: Before you file a new bug, please check to see if it has already been filed in this project. If it has, heart or comment the existing bug task to indicate that you\'ve experienced the same bug (instead of adding another task).\n\nMake sure it\'s actually a bug and not an enhancement requested by the client.'
+    // var taskMessage = 'URL: ' + me.page_url + '\n•Steps to reproduce:\n•What you expected to happen:\n•What actually happened: \n•More details:\n\nNote: Before you file a new bug, please check to see if it has already been filed in this project. If it has, heart or comment the existing bug task to indicate that you\'ve experienced the same bug (instead of adding another task).\n\nMake sure it\'s actually a bug and not an enhancement requested by the client.'
+
+    var taskMessage = 'URL: ' + me.page_url + '\n\nNOTES:\n' + $('#bug-notes').val();
 
     // Gather up custom fields data
     var customFieldsData = {};

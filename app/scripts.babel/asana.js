@@ -9,10 +9,10 @@ Asana = {
   // Natural dimensions of popup window. The Chrome popup window adds 10px
   // bottom padding, so we must add that as well when considering how tall
   // our popup window should be.
-  POPUP_UI_HEIGHT: 362 + 10,
+  POPUP_UI_HEIGHT: 336 + 10,
   POPUP_UI_WIDTH: 410,
   // Size of popup when expanded to include assignee list.
-  POPUP_EXPANDED_UI_HEIGHT: 362 + 10 + 129,
+  POPUP_EXPANDED_UI_HEIGHT: 336 + 10 + 129,
 
   // If the modifier key is TAB, amount of time user has from pressing it
   // until they can press Q and still get the popup to show up.
